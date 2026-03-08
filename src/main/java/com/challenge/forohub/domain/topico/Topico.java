@@ -3,6 +3,7 @@ package com.challenge.forohub.domain.topico;
 import com.challenge.forohub.domain.curso.Curso;
 import com.challenge.forohub.domain.usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -47,5 +48,14 @@ public class Topico {
         this.status = EstadoTopico.NO_RESPONDIDO; // Estado por defecto
         this.autor = autor;
         this.curso = curso;
+    }
+
+    public void actualizarDatos(DatosActualizarTopico datosActualizar) {
+        if (datosActualizar.titulo() != null && !datosActualizar.titulo().isBlank()) {
+            this.titulo = datosActualizar.titulo();
+        }
+        if (datosActualizar.mensaje() != null && !datosActualizar.mensaje().isBlank()) {
+            this.mensaje = datosActualizar.mensaje();
+        }
     }
 }

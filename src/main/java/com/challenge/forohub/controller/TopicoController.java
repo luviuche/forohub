@@ -78,4 +78,25 @@ public class TopicoController {
         // Si no existe, devolvemos un error 404 Not Found
         return ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Object> actualizarTopico(@PathVariable Long id, @RequestBody @Valid DatosActualizarTopico datosActualizar) {
+        // 1. Verificamos el ID (Si existe el tópico)
+        var topicoOptional = topicoRepository.findById(id);
+        if (topicoOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 2. Regla de negocio: Validar que la actualización no genere un duplicado con OTRO tópico
+        if (topicoRepository.existsByTituloAndMensajeAndIdNot(datosActualizar.titulo(), datosActualizar.mensaje(), id)) {
+            return ResponseEntity.badRequest().body("Ya existe otro tópico diferente con ese mismo título y mensaje.");
+        }
+
+        // 3. Si pasa las reglas, actualizamos
+        var topico = topicoOptional.get();
+        topico.actualizarDatos(datosActualizar);
+
+        return ResponseEntity.ok(new DatosRespuestaTopico(topico));
+    }
 }
