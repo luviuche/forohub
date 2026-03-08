@@ -99,4 +99,21 @@ public class TopicoController {
 
         return ResponseEntity.ok(new DatosRespuestaTopico(topico));
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Void> eliminarTopico(@PathVariable Long id) {
+        // Buscamos si el tópico existe antes de intentar eliminarlo
+        var topicoOptional = topicoRepository.findById(id);
+
+        if (topicoOptional.isPresent()) {
+            // Si existe, lo eliminamos físicamente de la base de datos
+            topicoRepository.deleteById(id);
+            // Retornamos el código 204 No Content
+            return ResponseEntity.noContent().build();
+        }
+
+        // Si el ID no se encuentra, retornamos 404 Not Found
+        return ResponseEntity.notFound().build();
+    }
 }
