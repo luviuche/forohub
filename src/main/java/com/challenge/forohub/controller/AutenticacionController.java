@@ -1,6 +1,9 @@
 package com.challenge.forohub.controller;
 
 import com.challenge.forohub.domain.usuario.DatosAutenticacionUsuario;
+import com.challenge.forohub.domain.usuario.Usuario;
+import com.challenge.forohub.infra.security.DatosJWTToken;
+import com.challenge.forohub.infra.security.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +22,18 @@ public class AutenticacionController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @PostMapping
-    public ResponseEntity autenticarUsuario(@RequestBody @Valid DatosAutenticacionUsuario datosAutenticacion) {
-        // Spring requiere que empaquetemos las credenciales en este objeto "Token" (no confundir con el JWT)
-        Authentication authToken = new UsernamePasswordAuthenticationToken(datosAutenticacion.correoElectronico(), datosAutenticacion.contrasena());
+    @Autowired
+    private TokenService tokenService;
 
-        // El AuthenticationManager va y llama a nuestro AutenticacionService para verificar en la base de datos
+    @PostMapping
+    public ResponseEntity<DatosJWTToken> autenticarUsuario(@RequestBody @Valid DatosAutenticacionUsuario datosAutenticacion) {
+        Authentication authToken = new UsernamePasswordAuthenticationToken(datosAutenticacion.correoElectronico(), datosAutenticacion.contrasena());
         var usuarioAutenticado = authenticationManager.authenticate(authToken);
 
-        // Si sale bien, devolvemos un 200 OK (Temporalmente, luego devolveremos el JWT aquí)
-        return ResponseEntity.ok().build();
+        // Obtenemos el usuario autenticado y generamos el token
+        var JWTtoken = tokenService.generarToken((Usuario) usuarioAutenticado.getPrincipal());
+
+        // Retornamos el token en formato JSON
+        return ResponseEntity.ok(new DatosJWTToken(JWTtoken));
     }
 }
