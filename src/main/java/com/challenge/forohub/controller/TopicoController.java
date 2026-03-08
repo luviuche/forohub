@@ -62,4 +62,20 @@ public class TopicoController {
 
         return ResponseEntity.ok(page);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DatosRespuestaTopico> detallarTopico(@PathVariable Long id) {
+        // Buscamos el tópico por su ID usando el Optional que nos devuelve Spring Data JPA
+        var topicoOptional = topicoRepository.findById(id);
+
+        // Verificamos si se encontró en la base de datos
+        if (topicoOptional.isPresent()) {
+            var topico = topicoOptional.get();
+            // Si existe, devolvemos un 200 OK con los datos del tópico
+            return ResponseEntity.ok(new DatosRespuestaTopico(topico));
+        }
+
+        // Si no existe, devolvemos un error 404 Not Found
+        return ResponseEntity.notFound().build();
+    }
 }
